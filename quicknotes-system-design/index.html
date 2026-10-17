@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickNotes API Client</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="api.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>QuickNotes API Lab</h1>
+    
+    <div class="action-panel">
+      <button id="load-btn">Load notes from server</button>
+      <p id="status" class="status-msg"></p>
+    </div>
+
+    <section class="form-section">
+      <h2>Create a New Note</h2>
+      <form id="note-form">
+        <div class="input-group">
+          <label for="title-input">Title (required, max 100 chars)</label>
+          <input id="title-input" type="text" maxlength="100" required />
+        </div>
+        <div class="input-group">
+          <label for="body-input">Body (optional)</label>
+          <textarea id="body-input" rows="3"></textarea>
+        </div>
+        <button type="submit" id="submit-btn">Send to server</button>
+      </form>
+    </section>
+
+    <section class="notes-section">
+      <h2>Notes Directory</h2>
+      <ul id="notes-list">
+        <li class="empty-state">No notes loaded yet. Click the button above to fetch notes.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
