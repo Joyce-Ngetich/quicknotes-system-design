@@ -80,3 +80,34 @@ Relational databases are optimized for structured tabular data and transactional
 └──────────────┘                  └──────────────┘                     │ (S3 / Blobs) │
                                                                        └──────────────┘
 ```
+
+## 6. Component Explanations
+
+**DNS:**: Translates human-readable domain names into machine-readable IP addresses to route client requests.
+**CDN (Content Delivery Network):** Caches static assets and media files close to global users on edge servers to minimize network latency.
+**Load Balancer:** Distributes incoming web and API traffic evenly across multiple application servers to prevent bottlenecks.
+**App Servers:** Stateless compute nodes that process business logic, handle client authentication, and coordinate database interactions.
+**Cache (Redis):** Stores frequently accessed data in high-speed memory (RAM) to serve read requests instantaneously without hitting the database.
+**Primary Database:** Handles all data modification queries (inserts, updates, deletes) to maintain absolute transactional consistency.  
+**Read Replicas:** Synchronized copies of the primary database dedicated solely to handling read queries, scaling database read capacity.  
+**Message Queue:** Asynchronously holds background tasks so the app server can respond immediately to the client without waiting for heavy processing to finish[cite: 5].
+**Worker:** Background process that pulls tasks from the queue to execute heavy operations like image resizing and thumbnail generation.
+**Object Storage:** Highly scalable, cost-effective storage service engineered specifically to house large unstructured binary files like raw photos and videos[cite: 3]
+
+## 7. Step-by-Step Photo Upload Flow
+
+i. **Initiation:** The client authenticates with an app server and sends a POST /photos request containing the image binary data and caption.
+
+ii. **File Storing:** The app server streams the raw 2 MB image file directly into the Object Storage bucket and receives back a secure public URL.
+
+iii. **Database Write:** The app server writes a new record into the Primary Database containing the user ID, caption, and the object storage image URL[cite: 3].
+
+iv. **Queue Offloading:** The app server pushes a background job message (create_thumbnail with the image reference) into the Message Queue and instantly replies to the client with 201 Created.
+
+v. **Worker Processing:** A background Worker pulls the job from the queue, downloads the raw photo, resizes it down to a 50 KB thumbnail, uploads the thumbnail back to the Object Storage, and updates the database record with the thumbnail URL.
+
+## 8. Architectural Trade-offs
+
+**Speed vs. Freshness (Eventual Consistency):** Read replicas and cached feeds deliver blazing-fast load times for users, but newly uploaded photos may take a few milliseconds to appear across all replicas due to replication lag.
+
+**Simplicity vs. Scalability:** Introducing distributed queues, object storage, and read replicas adds operational complexity and infrastructure overhead compared to a simple single-server monolith, but it is necessary to guarantee high availability and scale smoothly to 10 million users.
